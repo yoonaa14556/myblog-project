@@ -8,14 +8,10 @@ const memoryStorage: { [key: string]: string } = {};
 const memorySessionStorage: { [key: string]: string } = {};
 
 // localStorage/sessionStorage가 사용 가능한지 확인
-let isLocalStorageAvailable = false;
-let isSessionStorageAvailable = false;
-
 try {
   const testKey = '__storage_test__';
   localStorage.setItem(testKey, 'test');
   localStorage.removeItem(testKey);
-  isLocalStorageAvailable = true;
 } catch (e) {
   console.warn('localStorage를 사용할 수 없습니다. 메모리 저장소를 사용합니다.');
 }
@@ -24,7 +20,6 @@ try {
   const testKey = '__storage_test__';
   sessionStorage.setItem(testKey, 'test');
   sessionStorage.removeItem(testKey);
-  isSessionStorageAvailable = true;
 } catch (e) {
   console.warn('sessionStorage를 사용할 수 없습니다. 메모리 저장소를 사용합니다.');
 }

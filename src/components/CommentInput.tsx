@@ -25,8 +25,7 @@ export const CommentInput = ({
   onCancel,
   placeholder = '댓글을 작성하세요...',
   autoFocus = false,
-  initialContent = '',
-  replyToNickname
+  initialContent = ''
 }: CommentInputProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();

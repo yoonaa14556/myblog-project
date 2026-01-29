@@ -1,10 +1,10 @@
-import { useState, useRef, DragEvent, ChangeEvent, useEffect } from 'react';
+import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { resizeImage } from '@/utils/imageResize';
 import { toast } from 'sonner';
-import { X, Upload, Image as ImageIcon } from 'lucide-react';
+import { X, Image as ImageIcon } from 'lucide-react';
 
 interface ProfileEditModalProps {
   isOpen: boolean;

@@ -11,7 +11,7 @@ export const highlightText = (text: string, query: string) => {
   const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
   let lastIndex = 0;
 
-  text.replace(regex, (match, p1, offset) => {
+  text.replace(regex, (match, _p1, offset) => {
     // 매칭 전 텍스트 추가
     if (offset > lastIndex) {
       parts.push(text.substring(lastIndex, offset));

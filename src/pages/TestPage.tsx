@@ -21,7 +21,7 @@ export const TestPage = () => {
       }
 
       // 2. 테이블 접근 테스트
-      const { data: posts, error: postsError } = await supabase
+      const { error: postsError } = await supabase
         .from('posts')
         .select('count');
 

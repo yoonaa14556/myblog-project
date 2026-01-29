@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>myblog</title>
+    <!-- localStorage/sessionStorage 폴리필 - 가장 먼저 실행 -->
+    <script>
+      (function() {
+        'use strict';
+        
+        // 메모리 기반 저장소
+        class MemoryStorage {
+          constructor() {
+            this.data = new Map();
+          }
+          
+          get length() {
+            return this.data.size;
+          }
+          
+          clear() {
+            this.data.clear();
+          }
+          
+          getItem(key) {
+            return this.data.get(key) ?? null;
+          }
+          
+          key(index) {
+            const keys = Array.from(this.data.keys());
+            return keys[index] ?? null;
+          }
+          
+          removeItem(key) {
+            this.data.delete(key);
+          }
+          
+          setItem(key, value) {
+            this.data.set(key, String(value));
+          }
+        }
+        
+        // 안전한 Storage 래퍼
+        class SafeStorageWrapper {
+          constructor(storageType) {
+            this.fallback = new MemoryStorage();
+            this.realStorage = null;
+            this.storageType = storageType;
+            this.useRealStorage = false;
+            
+            // 기존 storage를 백업하고 접근 가능한지 확인
+            try {
+              const descriptor = Object.getOwnPropertyDescriptor(Window.prototype, storageType) || 
+                                Object.getOwnPropertyDescriptor(window, storageType);
+              
+              if (descriptor && descriptor.get) {
+                const storage = descriptor.get.call(window);
+                const testKey = '__storage_test__';
+                storage.setItem(testKey, 'test');
+                storage.removeItem(testKey);
+                this.realStorage = storage;
+                this.useRealStorage = true;
+              }
+            } catch (e) {
+              console.warn('[myblog] ' + storageType + ' 접근 차단 - 메모리 저장소 사용');
+            }
+          }
+          
+          get length() {
+            if (this.useRealStorage) {
+              try {
+                return this.realStorage.length;
+              } catch (e) {
+                this.useRealStorage = false;
+              }
+            }
+            return this.fallback.length;
+          }
+          
+          clear() {
+            if (this.useRealStorage) {
+              try {
+                this.realStorage.clear();
+              } catch (e) {
+                this.useRealStorage = false;
+              }
+            }
+            this.fallback.clear();
+          }
+          
+          getItem(key) {
+            if (this.useRealStorage) {
+              try {
+                return this.realStorage.getItem(key);
+              } catch (e) {
+                this.useRealStorage = false;
+              }
+            }
+            return this.fallback.getItem(key);
+          }
+          
+          key(index) {
+            if (this.useRealStorage) {
+              try {
+                return this.realStorage.key(index);
+              } catch (e) {
+                this.useRealStorage = false;
+              }
+            }
+            return this.fallback.key(index);
+          }
+          
+          removeItem(key) {
+            if (this.useRealStorage) {
+              try {
+                this.realStorage.removeItem(key);
+              } catch (e) {
+                this.useRealStorage = false;
+              }
+            }
+            this.fallback.removeItem(key);
+          }
+          
+          setItem(key, value) {
+            if (this.useRealStorage) {
+              try {
+                this.realStorage.setItem(key, value);
+                this.fallback.setItem(key, value); // fallback에도 동기화
+                return;
+              } catch (e) {
+                this.useRealStorage = false;
+              }
+            }
+            this.fallback.setItem(key, value);
+          }
+        }
+        
+        // 폴리필 적용
+        try {
+          const safeLocalStorage = new SafeStorageWrapper('localStorage');
+          const safeSessionStorage = new SafeStorageWrapper('sessionStorage');
+          
+          Object.defineProperty(window, 'localStorage', {
+            value: safeLocalStorage,
+            writable: false,
+            configurable: true
+          });
+          
+          Object.defineProperty(window, 'sessionStorage', {
+            value: safeSessionStorage,
+            writable: false,
+            configurable: true
+          });
+          
+          console.log('[myblog] Storage 폴리필 적용 완료');
+        } catch (e) {
+          console.error('[myblog] Storage 폴리필 실패:', e);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
